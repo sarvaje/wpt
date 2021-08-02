@@ -24,14 +24,8 @@
 <script>
 'use strict';
 
-// TODO(crbug.com/1216655): Remove time range. Once time range is removed, all
-// functions that include ...WithTimeRange() should be replaced with the same
-// function but without that ending. For example:
-//
-// createScrollLinkedAnimationWithTimeRange() => createScrollLinkedAnimation()
-
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   // Wait for new animation frame which allows the timeline to compute new
   // current time.
   await waitForNextFrame();
@@ -39,14 +33,14 @@ promise_test(async t => {
   animation.cancel();
 
   assert_equals(animation.startTime, null,
-                'The start time of a canceled animation should be unresolved');
+    'The start time of a canceled animation should be unresolved');
   assert_equals(animation.currentTime, null,
-                'The hold time of a canceled animation should be unresolved');
+    'The hold time of a canceled animation should be unresolved');
 }, 'Canceling an animation should cause its start time and hold time to be'
    + ' unresolved');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   // Wait for new animation frame which allows the timeline to compute new
   // current time.
   await waitForNextFrame();
@@ -55,7 +49,7 @@ promise_test(async t => {
     assert_unreached('ready promise was fulfilled');
   }).catch(err => {
     assert_equals(err.name, 'AbortError',
-                  'ready promise is rejected with AbortError');
+      'ready promise is rejected with AbortError');
   });
 
   animation.cancel();
@@ -65,7 +59,7 @@ promise_test(async t => {
    + ' canceled');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   // Wait for new animation frame which allows the timeline to compute new
   // current time.
   await waitForNextFrame();
@@ -81,12 +75,12 @@ promise_test(async t => {
   animation.cancel();
 
   await promise_rejects_dom(t, 'AbortError', originalPromise,
-                        'Cancel should abort ready promise');
+    'Cancel should abort ready promise');
 }, 'A pause-pending ready promise should be rejected when the animation is'
    + ' canceled');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   // Wait for new animation frame which allows the timeline to compute new
   // current time.
   await waitForNextFrame();
@@ -97,7 +91,7 @@ promise_test(async t => {
 }, 'When an animation is canceled, it should create a resolved Promise');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   // Wait for new animation frame which allows the timeline to compute new
   // current time.
   await waitForNextFrame();
@@ -105,16 +99,17 @@ promise_test(async t => {
   const promise = animation.ready;
   animation.cancel();
   assert_not_equals(animation.ready, promise);
-  promise_rejects_dom(t, 'AbortError', promise, 'Cancel should abort ready promise');
+  promise_rejects_dom(t, 'AbortError', promise,
+    'Cancel should abort ready promise');
 }, 'The ready promise should be replaced when the animation is canceled');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   // Wait for new animation frame which allows the timeline to compute new
   // current time.
   await waitForNextFrame();
   assert_equals(animation.playState, 'idle',
-                'The animation should be initially idle');
+    'The animation should be initially idle');
 
   animation.finished.then(t.step_func(() => {
     assert_unreached('Finished promise should not resolve');
@@ -129,12 +124,12 @@ promise_test(async t => {
    + ' idle');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   // Wait for new animation frame which allows the timeline to compute new
   // current time.
   await waitForNextFrame();
   assert_equals(animation.playState, 'idle',
-                'The animation should be initially idle');
+    'The animation should be initially idle');
 
   animation.oncancel = t.step_func(() => {
     assert_unreached('Cancel event should not be fired');
@@ -147,7 +142,7 @@ promise_test(async t => {
    + ' idle');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   // Wait for new animation frame which allows the timeline to compute new
   // current time.
   await waitForNextFrame();
@@ -166,7 +161,7 @@ promise_test(async t => {
 }, 'Canceling an animation should fire cancel event on orphaned element');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   const scroller = animation.timeline.scrollSource;
 
   // Wait for new animation frame which allows the timeline to compute new
@@ -180,17 +175,17 @@ promise_test(async t => {
   scroller.scrollTop;
   await waitForNextFrame();
   assert_equals(animation.timeline.currentTime, null,
-                'Sanity check the timeline is inactive.');
+    'Sanity check the timeline is inactive.');
   animation.cancel();
   assert_equals(animation.startTime, null,
-                'The start time of a canceled animation should be unresolved');
+    'The start time of a canceled animation should be unresolved');
   assert_equals(animation.currentTime, null,
-              'The current time of a canceled animation should be unresolved');
+    'The current time of a canceled animation should be unresolved');
 }, 'Canceling an animation with inactive timeline should cause its start time'
    + ' and hold time to be unresolved');
 
 promise_test(async t => {
-  const animation = createScrollLinkedAnimationWithTimeRange(t);
+  const animation = createScrollLinkedAnimation(t);
   const scroller = animation.timeline.scrollSource;
 
   // Wait for new animation frame which allows the timeline to compute new
@@ -204,16 +199,16 @@ promise_test(async t => {
   scroller.scrollTop;
   await waitForNextFrame();
   assert_equals(animation.timeline.currentTime, null,
-                'Sanity check the timeline is inactive.');
+    'Sanity check the timeline is inactive.');
 
   const eventWatcher = new EventWatcher(t, animation, 'cancel');
   animation.cancel();
   const cancelEvent = await eventWatcher.wait_for('cancel');
 
   assert_equals(cancelEvent.currentTime, null,
-      'event.currentTime should be unresolved when the timeline is inactive.');
+    'event.currentTime should be unresolved when the timeline is inactive.');
   assert_equals(cancelEvent.timelineTime, null,
-      'event.timelineTime should be unresolved when the timeline is inactive');
+    'event.timelineTime should be unresolved when the timeline is inactive');
 }, 'oncancel event is fired when the timeline is inactive.');
 
 </script>

@@ -284,16 +284,16 @@ function assert_phase_at_time(animation, phase, currentTime) {
     animation.effect.updateTiming({ fill: 'none' });
     assert_not_equals(animation.effect.getComputedTiming().progress, null,
                       'Animation effect is in active phase when current time'
-                      + ` is ${currentTime}ms`);
+                      + ` is ${currentTime}`);
   } else {
     // The easiest way to distinguish between the 'before' phase and the 'after'
     // phase is to toggle the fill mode. For example, if the progress is null
-    // will the fill node is 'none' but non-null when the fill mode is
+    // when the fill mode is 'none' but non-null when the fill mode is
     // 'backwards' then we are in the before phase.
     animation.effect.updateTiming({ fill: 'none' });
     assert_equals(animation.effect.getComputedTiming().progress, null,
                   `Animation effect is in ${phase} phase when current time`
-                  + ` is ${currentTime}ms`
+                  + ` is ${currentTime}`
                   + ' (progress is null with \'none\' fill mode)');
 
     animation.effect.updateTiming({
@@ -301,7 +301,7 @@ function assert_phase_at_time(animation, phase, currentTime) {
     });
     assert_not_equals(animation.effect.getComputedTiming().progress, null,
                       `Animation effect is in ${phase} phase when current time`
-                      + ` is ${currentTime}ms`
+                      + ` is ${currentTime}`
                       + ' (progress is non-null with appropriate fill mode)');
   }
 }

@@ -60,12 +60,6 @@
 <script>
   'use strict';
 
-  // TODO(crbug.com/1216655): Remove time range. Once time range is removed, all
-  // functions that include ...WithTimeRange() should be replaced with the same
-  // function but without that ending. For example:
-  //
-  // createScrollLinkedAnimationWithTimeRange() => createScrollLinkedAnimation()
-
   async function createScrollAnimationTest(description, config) {
     promise_test(async t => {
       const scroller = createScrollerWithStartAndEnd(t, config.orientation);
@@ -81,19 +75,17 @@
       const timeline = createScrollTimeline(t, {
         scrollSource: scroller,
         orientation: config.orientation,
-        timeRange: 1000,
         fill: 'both',
         scrollOffsets:
-            [{target: start, ...config.start}, {target: end, ...config.end }]
+          [{target: start, ...config.start}, {target: end, ...config.end }]
       });
 
       // Wait for new animation frame  which allows the timeline to compute new
       // current time.
       await waitForNextFrame();
 
-      const animation = createScrollLinkedAnimationWithTimeRange(t, timeline);
+      const animation = createScrollLinkedAnimation(t, timeline);
       const scrollRange = end.offsetTop - start.offsetTop;
-      const timeRange = animation.timeline.timeRange;
 
       // Verify initial start and current times in Idle state.
       assert_equals(animation.currentTime, null,
@@ -104,16 +96,16 @@
       animation.play();
       assert_true(animation.pending, "Animation is in pending state.");
       // Verify initial start and current times in Pending state.
-      assert_times_equal(animation.currentTime, 0,
+      assert_percents_equal(animation.currentTime, 0,
         "The current time is zero in Pending state.");
-      assert_equals(animation.startTime, 0,
+      assert_percents_equal(animation.startTime, 0,
         "The start time is zero in Pending state.");
 
       await animation.ready;
       // Verify initial start and current times in Playing state.
-      assert_times_equal(animation.currentTime, 0,
+      assert_percents_equal(animation.currentTime, 0,
         "The current time is zero in Playing state.");
-      assert_times_equal(animation.startTime, 0,
+      assert_percents_equal(animation.startTime, 0,
         "The start time is zero in Playing state.");
 
       // Now do some scrolling and make sure that the Animation current time is
@@ -127,14 +119,18 @@
       }
 
       await waitForNextFrame();
-      assert_times_equal(animation.timeline.currentTime, config.expectedCurrentTime,
-        "The timeline current time corresponds to the scroll position of the scroller.");
-      assert_times_equal(animation.currentTime, config.expectedCurrentTime,
-        "The animation current time corresponds to the scroll position of the scroller.");
-      assert_times_equal(
-        animation.effect.getComputedTiming().localTime,
+      assert_percents_equal(animation.timeline.currentTime,
         config.expectedCurrentTime,
-        'Effect local time corresponds to the scroll position of the scroller.');
+        "The timeline current time corresponds to the scroll position of " +
+        "the scroller.");
+      assert_percents_equal(animation.currentTime,
+        config.expectedCurrentTime,
+        "The animation current time corresponds to the scroll position of " +
+        "the scroller.");
+      assert_percents_equal(animation.effect.getComputedTiming().localTime,
+        config.expectedCurrentTime,
+        "Effect local time corresponds to the scroll position of the " +
+        "scroller.");
     }, description);
   }
 
@@ -153,22 +149,22 @@
     // offsets: [100, 1100]
     "after start": {
       scrollTo: 200,
-      expectedCurrentTime: 100,
+      expectedCurrentTime: 10,
     },
     // offsets: [100, 1100]
     "at middle" : {
       scrollTo: 600,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
     // offsets: [100, 1100]
     "at end" : {
       scrollTo: 1099,
-      expectedCurrentTime: 999,
+      expectedCurrentTime: 99.9,
     },
     // offsets: [100, 1100]
     "after end" : {
       scrollTo: 1150,
-      expectedCurrentTime: 1000,
+      expectedCurrentTime: 100,
     },
     // offsets: [75, 1075]
     "with threshold 0.5" : {
@@ -177,20 +173,20 @@
       start: {threshold: 0.5},
       end: {threshold: 0.5},
       scrollTo: 600 - 25,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
     // offsets: [50, 1050]
     "with threshold 1.0": {
       start: {threshold: 1.0},
       end: {threshold: 1.0},
       scrollTo: 600 - 50,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
     // offset: [100, 550]
     "with end edge" : {
       end: {edge: "end"},
       scrollTo: 325,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
     // offset: [100, 600]
      "with end edge and threshold 1.0": {
@@ -199,14 +195,14 @@
         edge: "end"
       },
       scrollTo: 350,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
   };
 
   for (let orientation of ['vertical', 'horizontal']) {
     for (let testName in tests) {
       const description = `Animation start and current times are correct given
-          element-based offsets for orienation ${orientation} and ${testName}.`;
+        element-based offsets for orienation ${orientation} and ${testName}.`;
       const config = tests[testName];
       config.orientation = orientation;
       createScrollAnimationTest(description, config);

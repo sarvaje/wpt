@@ -52,12 +52,6 @@
 <script>
   'use strict';
 
-  // TODO(crbug.com/1216655): Remove time range. Once time range is removed, all
-  // functions that include ...WithTimeRange() should be replaced with the same
-  // function but without that ending. For example:
-  //
-  // createScrollLinkedAnimationWithTimeRange() => createScrollLinkedAnimation()
-
   function createScrollerWithTarget(test, config) {
     const orientationClass = config.orientation;
     const positions = `
@@ -89,7 +83,6 @@
       const timeline = createScrollTimeline(t, {
         scrollSource: scroller,
         orientation: config.orientation,
-        timeRange: 1000,
         fill: 'both',
         scrollOffsets: [{target: target, edge: 'end', ...config.start},
                         {target: target, edge:'start', ...config.end }]
@@ -99,8 +92,7 @@
       // current time.
       await waitForNextFrame();
 
-      const animation = createScrollLinkedAnimationWithTimeRange(t, timeline);
-      const timeRange = animation.timeline.timeRange;
+      const animation = createScrollLinkedAnimation(t, timeline);
 
       // Verify initial start and current times in Idle state.
       assert_equals(animation.currentTime, null,
@@ -111,16 +103,16 @@
       animation.play();
       assert_true(animation.pending, "Animation is in pending state.");
       // Verify initial start and current times in Pending state.
-      assert_times_equal(animation.currentTime, 0,
+      assert_percents_equal(animation.currentTime, 0,
         "The current time is zero in Pending state.");
-      assert_equals(animation.startTime, 0,
+      assert_percents_equal(animation.startTime, 0,
         "The start time is zero in Pending state.");
 
       await animation.ready;
       // Verify initial start and current times in Playing state.
-      assert_times_equal(animation.currentTime, 0,
+      assert_percents_equal(animation.currentTime, 0,
         "The current time is zero in Playing state.");
-      assert_times_equal(animation.startTime, 0,
+      assert_percents_equal(animation.startTime, 0,
         "The start time is zero in Playing state.");
 
       // Now do some scrolling and make sure that the Animation current time is
@@ -135,14 +127,19 @@
 
       await waitForNextFrame();
 
-      assert_times_equal(animation.timeline.currentTime, config.expectedCurrentTime,
-        "The timeline current time corresponds to the scroll position of the scroller.");
-      assert_times_equal(animation.currentTime, config.expectedCurrentTime,
-        "The animation current time corresponds to the scroll position of the scroller.");
-      assert_times_equal(
+      assert_percents_equal(animation.timeline.currentTime,
+        config.expectedCurrentTime,
+        "The timeline current time corresponds to the scroll position of " +
+        "the scroller.");
+      assert_percents_equal(animation.currentTime,
+        config.expectedCurrentTime,
+        "The animation current time corresponds to the scroll position of " +
+        "the scroller.");
+      assert_percents_equal(
         animation.effect.getComputedTiming().localTime,
         config.expectedCurrentTime,
-        'Effect local time corresponds to the scroll position of the scroller.');
+        "Effect local time corresponds to the scroll position of the " +
+        "scroller.");
     }, description);
   }
 
@@ -180,14 +177,14 @@
       startElementPosition: '500px',
       endElementPosition: '600px',
       scrollTo: 300,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
     // offsets: [0, 600]
     "start is visible at zero offset and should get clamped": {
       startElementPosition: '400px',
       endElementPosition: '600px',
       scrollTo: 300,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
 
     // offsets: [0, scroll_max]
@@ -195,7 +192,7 @@
       startElementPosition: '500px',
       endElementPosition: '800px',
       scrollTo: scroll_max / 2,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
 
     // offsets: [0, scroll_max]
@@ -203,7 +200,7 @@
       startElementPosition: '400px',
       endElementPosition: '800px',
       scrollTo: scroll_max / 2,
-      expectedCurrentTime: 500,
+      expectedCurrentTime: 50,
     },
   };
 
