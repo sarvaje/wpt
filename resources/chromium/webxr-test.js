@@ -733,7 +733,7 @@ class MockRuntime {
           leftDegrees: 50.899,
           rightDegrees: 35.197
         },
-        headFromEye: composeGFXTransform({
+        mojoFromView: composeGFXTransform({
           position: [-0.032, 0, 0],
           orientation: [0, 0, 0, 1]
         }),
@@ -747,7 +747,7 @@ class MockRuntime {
           leftDegrees: 50.899,
           rightDegrees: 35.197
         },
-        headFromEye: composeGFXTransform({
+        mojoFromView: composeGFXTransform({
           position: [0.032, 0, 0],
           orientation: [0, 0, 0, 1]
         }),
@@ -807,7 +807,7 @@ class MockRuntime {
     return {
       eye: viewEye,
       fieldOfView: fov,
-      headFromEye: composeGFXTransform(fakeXRViewInit.viewOffset),
+      mojoFromView: composeGFXTransform(fakeXRViewInit.viewOffset),
       viewport: {
         width: fakeXRViewInit.resolution.width,
         height: fakeXRViewInit.resolution.height
@@ -881,9 +881,37 @@ class MockRuntime {
           }
         }
 
+        const viewport_size = 50;
         const frameData = {
           pose: this.pose_,
-          views: [],
+          views: [{
+            eye: vrMojom.XREye.kLeft,
+            fieldOfView: {
+              upDegrees: 48.316,
+              downDegrees: 50.099,
+              leftDegrees: 50.899,
+              rightDegrees: 35.197
+            },
+            mojoFromView: composeGFXTransform({
+              position: [-0.032, 0, 0],
+              orientation: [0, 0, 0, 1]
+            }),
+            viewport: { width: viewport_size, height: viewport_size }
+          },
+          {
+            eye: vrMojom.XREye.kRight,
+            fieldOfView: {
+              upDegrees: 48.316,
+              downDegrees: 50.099,
+              leftDegrees: 50.899,
+              rightDegrees: 35.197
+            },
+            mojoFromView: composeGFXTransform({
+              position: [0.032, 0, 0],
+              orientation: [0, 0, 0, 1]
+            }),
+            viewport: { width: viewport_size, height: viewport_size }
+          }],
           mojoSpaceReset: mojo_space_reset,
           inputState: input_state,
           timeDelta: {
